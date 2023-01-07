@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/feedback_border">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        >
+
+        <ImageView
+            android:id="@+id/whatsapp_btn1"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_below="@+id/heading1"
+            android:layout_marginTop="25dp"
+            android:layout_toRightOf="@+id/feedback"
+            android:layout_marginRight="1300dp"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/ic_icons8_whatsapp__1_" />
+
+        <Button
+            android:id="@+id/timee"
+            android:backgroundTint="@color/lightred"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/datetime"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="5dp"
+            android:text="Set Time"
+            android:textSize="25dp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/datetime"
+            android:backgroundTint="@color/lightred"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/w_feedback"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="5dp"
+            android:text="Set date"
+            android:textSize="25dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/heading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="50dp"
+            android:text="Feed"
+            android:textColor="@color/white"
+            android:textSize="50dp"
+            android:textStyle="bold" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="back"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:textSize="50dp"
+        android:layout_marginRight="10dp"
+        android:layout_toRightOf="@+id/heading"
+        android:id="@+id/heading1"/>
+
+   <RadioGroup
+       android:layout_width="200dp"
+       android:layout_height="wrap_content"
+       android:orientation="vertical"
+       android:layout_marginLeft="20dp"
+       android:layout_marginTop="10dp"
+       android:id="@+id/feedback"
+       android:layout_below="@+id/heading">
+       <RadioButton
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="Interested"
+           android:textSize="20dp"
+           android:id="@+id/E"/>
+       <RadioButton
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="Not Interested"
+           android:textSize="20dp"
+           android:id="@+id/G"/>
+       <RadioButton
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="Busy/Ringing"
+           android:textSize="20dp"
+           android:id="@+id/A"/>
+       <RadioButton
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="Sale"
+           android:textSize="20dp"
+           android:id="@+id/B"/>
+       <RadioButton
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="Out of Service"
+           android:textSize="20dp"
+           android:id="@+id/O"/>
+       <RadioButton
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="Schedule Call"
+           android:textSize="20dp"
+           android:id="@+id/S"/>
+       <RadioButton
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="Wrong Number"
+           android:textSize="20dp"
+           android:id="@+id/w"/>
+   </RadioGroup>
+
+        <EditText
+            android:id="@+id/w_feedback"
+            android:layout_width="250dp"
+            android:layout_height="70dp"
+            android:layout_below="@+id/feedback"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:hint="Write Feedback"
+            android:background="@color/white" />
+
+        <Button
+            android:id="@+id/submit_feedback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/timee"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/black"
+            android:text="Submit"
+            android:textSize="20dp" />
+
+        <CheckBox
+            android:id="@+id/schedule"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/heading1"
+            android:layout_marginLeft="150dp"
+            android:layout_marginTop="155dp"
+            android:text="Re-Schedule"
+            android:textSize="20dp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+</ScrollView>

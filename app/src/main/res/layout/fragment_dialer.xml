@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.DialerFragment">
+<RelativeLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <!-- TODO: Update blank fragment layout -->
+
+
+    <ImageButton
+        android:id="@+id/addContact"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/logo" />
+
+    <ImageButton
+        android:id="@+id/start"
+        android:layout_width="290dp"
+        android:layout_height="80dp"
+        android:layout_below="@+id/addContact"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:backgroundTint="@color/red"
+        android:src="@drawable/ic_dialer"
+        android:text="Start"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="15dp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/PendingBtn"
+        android:layout_width="170dp"
+        android:layout_height="110dp"
+        android:layout_below="@+id/start"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="55dp"
+        android:backgroundTint="@color/red"
+        android:text="Pending\n1"
+        android:textAlignment="center"
+        android:textColor="@color/black" />
+
+    <Button
+        android:id="@+id/DoneBtn"
+        android:layout_width="170dp"
+        android:layout_height="110dp"
+        android:layout_below="@+id/start"
+        android:layout_marginLeft="220dp"
+        android:layout_marginTop="55dp"
+        android:backgroundTint="@color/red"
+        android:text="Done\n0"
+        android:textAlignment="center"
+        android:textColor="@color/black" />
+</RelativeLayout>
+</ScrollView>
