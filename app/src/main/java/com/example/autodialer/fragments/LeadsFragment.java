@@ -114,7 +114,7 @@ public class LeadsFragment extends Fragment  {
 
     public static void loadData(int page, Context context)
     {
-        SharedPreferences pref = context.getSharedPreferences("MyPref", Activity.MODE_PRIVATE);
+        SharedPreferences pref = context.getSharedPreferences("AutoDialer", Activity.MODE_PRIVATE);
         Constants.id = pref.getString("id","");
         ApiInterface.getApiRequestInterface().getLeads(Integer.parseInt(Constants.id), page)
                 .enqueue(new Callback<Leads>() {

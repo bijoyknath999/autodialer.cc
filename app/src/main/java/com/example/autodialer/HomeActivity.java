@@ -54,7 +54,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
         bottom_nv.setOnNavigationItemSelectedListener(this);
         getSupportFragmentManager().beginTransaction().replace(R.id.containFrag,df).commit();
 
-        SharedPreferences pref = getSharedPreferences("MyPref", Activity.MODE_PRIVATE);
+        SharedPreferences pref = getSharedPreferences("AutoDialer", Activity.MODE_PRIVATE);
         Constants.adminID = pref.getString("admin_id","");
         Constants.id = pref.getString("id","");
         getScheduleTime();

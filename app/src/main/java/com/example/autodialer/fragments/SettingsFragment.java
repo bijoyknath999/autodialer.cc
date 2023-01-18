@@ -37,7 +37,7 @@ public class SettingsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_settings, container, false);
-        sharedPreferences = context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences("AutoDialer", Context.MODE_PRIVATE);
 
         Constants.id = sharedPreferences.getString("id", "");
         Constants.name = sharedPreferences.getString("name", "");

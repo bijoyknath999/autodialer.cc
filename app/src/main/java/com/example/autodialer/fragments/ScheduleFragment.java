@@ -69,7 +69,7 @@ public class ScheduleFragment extends Fragment {
         scheduleAdapters = new ScheduleAdapters(datum2List,context);
         recyclerView.setAdapter(scheduleAdapters);
 
-        SharedPreferences pref = context.getSharedPreferences("MyPref", Activity.MODE_PRIVATE);
+        SharedPreferences pref = context.getSharedPreferences("AutoDialer", Activity.MODE_PRIVATE);
         Constants.adminID = pref.getString("admin_id","");
 
         getData(1,context);
@@ -141,7 +141,7 @@ public class ScheduleFragment extends Fragment {
                             List<Datum2> datum2List1 = schedule.getData();
                             for (Datum2 datum2 : datum2List1)
                             {
-                                SharedPreferences pref = context.getApplicationContext().getSharedPreferences("MyPref", Activity.MODE_PRIVATE);
+                                SharedPreferences pref = context.getApplicationContext().getSharedPreferences("AutoDialer", Activity.MODE_PRIVATE);
                                 String userId = pref.getString("id","");
                                 if (userId.equals(datum2.getUserId()))
                                     datum2List.add(datum2);

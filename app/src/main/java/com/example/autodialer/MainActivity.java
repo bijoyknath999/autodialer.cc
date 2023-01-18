@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements PermissionUtil.Pe
     @Override
     protected void onStart() {
         super.onStart();
-        SharedPreferences sp = this.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+        SharedPreferences sp = this.getSharedPreferences("AutoDialer", Context.MODE_PRIVATE);
         boolean b = sp.getBoolean("key_name", false);
         if (b) {
             Constants.id = sp.getString("id", "");
@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements PermissionUtil.Pe
                                         @Override
                                         public void onResponse(Call<String> call, retrofit2.Response<String> response) {
                                             if (response.isSuccessful()) {
-                                                SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", Activity.MODE_PRIVATE);
+                                                SharedPreferences pref = getApplicationContext().getSharedPreferences("AutoDialer", Activity.MODE_PRIVATE);
                                                 SharedPreferences.Editor editor = pref.edit();
                                                 editor.putBoolean("key_name", true);
                                                 editor.putString("id", Constants.id);

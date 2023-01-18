@@ -84,7 +84,7 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
         Datum datum = datumList.get(position);;
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(context.LAYOUT_INFLATER_SERVICE);
 
-        SharedPreferences pref = context.getApplicationContext().getSharedPreferences("MyPref", Activity.MODE_PRIVATE);
+        SharedPreferences pref = context.getApplicationContext().getSharedPreferences("AutoDialer", Activity.MODE_PRIVATE);
         String userId = pref.getString("id","");
         String admin_id = pref.getString("admin_id","");
 
@@ -519,7 +519,7 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
     private String getConverteddate(String date)
     {
         Date date2 = null;
-        SimpleDateFormat formatter1=new SimpleDateFormat("dd-mm-yy");
+        SimpleDateFormat formatter1=new SimpleDateFormat("MM-dd-yy");
         try {
             date2=formatter1.parse(date);
         } catch (ParseException e) {

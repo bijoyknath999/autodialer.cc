@@ -88,7 +88,7 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
         Datum2 datum2 = datum2List.get(position);
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(context.LAYOUT_INFLATER_SERVICE);
 
-        SharedPreferences pref = context.getApplicationContext().getSharedPreferences("MyPref", Activity.MODE_PRIVATE);
+        SharedPreferences pref = context.getApplicationContext().getSharedPreferences("AutoDialer", Activity.MODE_PRIVATE);
         String userId = pref.getString("id","");
         String admin_id = pref.getString("admin_id","");
 

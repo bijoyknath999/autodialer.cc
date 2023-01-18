@@ -36,7 +36,7 @@ public class DialerFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_dialer, container, false);
         pending = (Button) view.findViewById(R.id.PendingBtn);
         done = (Button) view.findViewById(R.id.DoneBtn);
-        sp = getActivity().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+        sp = getActivity().getSharedPreferences("AutoDialer", Context.MODE_PRIVATE);
         editor = sp.edit();
         Constants.id = sp.getString("id", "");
         Constants.done = sp.getString("done", "0");
