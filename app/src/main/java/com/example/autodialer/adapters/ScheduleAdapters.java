@@ -35,8 +35,7 @@ import com.example.autodialer.api.ApiInterface;
 import com.example.autodialer.api.Constant_client;
 import com.example.autodialer.api.Constants;
 import com.example.autodialer.fragments.ScheduleFragment;
-import com.example.autodialer.fragments.TasksFragment;
-import com.example.autodialer.models.Datum;
+import com.example.autodialer.fragments.LeadsFragment;
 import com.example.autodialer.models.Datum2;
 import com.example.autodialer.models.Recording;
 
@@ -63,10 +62,10 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
     EditText w_feedback;
     CheckBox schedule;
     View v;
-    TasksFragment TF=new TasksFragment();
+    LeadsFragment TF=new LeadsFragment();
     String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
     Button dd,tt;
-    String Datee,Timee;
+    String Datee,Timee, campaign_id, lead_id,company_name, w_feed;
     final Calendar myCalendar= Calendar.getInstance();
     final Calendar c = Calendar.getInstance();
     int mHour = c.get(Calendar.HOUR_OF_DAY);
@@ -80,7 +79,7 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
     @NonNull
     @Override
     public ScheduleAdapters.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.tasks, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_schedule, parent, false);
         return new ViewHolder(view);
     }
 
@@ -203,6 +202,8 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
                 submit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        if (progress!=null)
+                            progress.show();
                         int selectedId = feedback.getCheckedRadioButtonId();
                         if (selectedId == -1) {
                             // Toast.makeText("No answer has been selected",Toast.LENGTH_SHORT).show();
@@ -213,6 +214,9 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
 
                         }
                         del_id = datum2.getId().toString();
+                        campaign_id = datum2.getCampaign_id().toString();
+                        lead_id = datum2.getLead_id().toString();
+                        company_name = datum2.getCompany().toString();
 
                         String date_time;
                         if(Schedule_res.equals("Yes")){
@@ -233,22 +237,32 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
                             date_time= "00:00";
                         }
 
+                        w_feed = w_feedback.getText().toString();
+                        if (w_feed.isEmpty())
+                            w_feed = "NA";
 
-                        ApiInterface.getApiRequestInterface().updateRecording(del_id,userId,admin_id,Feedback,
-                                w_feedback.getText().toString(),Schedule_res,"",datum2.getClientPno(),
-                                        datum2.getClientName(),datum2.getClientCity(),date_time,"00:00")
+                        System.out.println("Datum : "+company_name+" "+campaign_id+" "+lead_id+" "+del_id+" "+w_feed+" "+userId+" "
+                        +admin_id+" "+Feedback+" "+Schedule_res+" "+datum2.getClientPno()+" "+date_time+" "+datum2.getClientCity()+
+                                " "+datum2.getClientName());
+
+                        ApiInterface.getApiRequestInterface().updateRecording(Integer.parseInt(del_id),userId,admin_id,Feedback,
+                                w_feed,Schedule_res,"",datum2.getClientPno(),
+                                        datum2.getClientName(),datum2.getClientCity(),date_time,
+                                        "00:00",company_name,campaign_id,lead_id)
                                 .enqueue(new Callback<Recording>() {
                                     @Override
                                     public void onResponse(Call<Recording> call, Response<Recording> response) {
                                         if (response.isSuccessful())
                                         {
                                             ScheduleFragment.LoadDataAfterDelete(context);
-                                            progress.dismiss();
+                                            if (progress!=null)
+                                                progress.dismiss();
                                             popupWindow.dismiss();
                                             Toast.makeText(context, "Submitted Successfully", Toast.LENGTH_SHORT).show();
                                         }
                                         else {
-                                            progress.dismiss();
+                                            if (progress!=null)
+                                                progress.dismiss();
                                             try {
                                                 JSONObject jObjError = new JSONObject(response.errorBody().string());
                                                 Toast.makeText(context, ""+jObjError.getString("message"), Toast.LENGTH_LONG).show();
@@ -261,7 +275,8 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
 
                                     @Override
                                     public void onFailure(Call<Recording> call, Throwable t) {
-                                        progress.dismiss();
+                                        if (progress!=null)
+                                            progress.dismiss();
                                         Toast.makeText(context, "Error : "+t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                                     }
                                 });
@@ -368,6 +383,8 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
                 submit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        if (progress!=null)
+                            progress.show();
                         int selectedId = feedback.getCheckedRadioButtonId();
                         if (selectedId == -1) {
                             // Toast.makeText("No answer has been selected",Toast.LENGTH_SHORT).show();
@@ -378,6 +395,10 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
 
                         }
                         del_id = datum2.getId().toString();
+                        campaign_id = datum2.getCampaign_id().toString();
+                        lead_id = datum2.getLead_id().toString();
+                        company_name = datum2.getCompany();
+
 
                         String date_time;
                         if(Schedule_res.equals("Yes")){
@@ -398,22 +419,28 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
                             date_time= "00:00";
                         }
 
-                        ApiInterface.getApiRequestInterface().updateRecording(del_id,userId,admin_id,Feedback,
-                                        w_feedback.getText().toString(),Schedule_res,"",datum2.getClientPno(),
-                                        datum2.getClientName(),datum2.getClientCity(),date_time,"00:00")
+                        w_feed = w_feedback.getText().toString();
+                        if (w_feed.isEmpty())
+                            w_feed = "NA";
+
+                        ApiInterface.getApiRequestInterface().updateRecording(Integer.parseInt(del_id),userId,admin_id,Feedback,
+                                        w_feed,Schedule_res,"",datum2.getClientPno(),
+                                        datum2.getClientName(),datum2.getClientCity(),date_time,
+                                        "00:00",company_name,campaign_id,lead_id)
                                 .enqueue(new Callback<Recording>() {
                                     @Override
                                     public void onResponse(Call<Recording> call, Response<Recording> response) {
                                         if (response.isSuccessful())
                                         {
                                             ScheduleFragment.LoadDataAfterDelete(context);
-                                            progress.dismiss();
+                                            if (progress!=null)
+                                                progress.dismiss();
                                             popupWindow.dismiss();
-                                            Toast.makeText(context, ""+Schedule_res, Toast.LENGTH_SHORT).show();
                                             Toast.makeText(context, "Submitted Successfully", Toast.LENGTH_SHORT).show();
                                         }
                                         else {
-                                            progress.dismiss();
+                                            if (progress!=null)
+                                                progress.dismiss();
                                             try {
                                                 JSONObject jObjError = new JSONObject(response.errorBody().string());
                                                 Toast.makeText(context, ""+jObjError.getString("message"), Toast.LENGTH_LONG).show();
@@ -426,7 +453,8 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
 
                                     @Override
                                     public void onFailure(Call<Recording> call, Throwable t) {
-                                        progress.dismiss();
+                                        if (progress!=null)
+                                            progress.dismiss();
                                         Toast.makeText(context, "Error : "+t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                                     }
                                 });
@@ -437,9 +465,10 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
 
 
         holder.Name.setText(datum2.getClientName());
-        holder.Country.setText("");
         holder.City.setText(datum2.getClientCity());
         holder.Phone.setText(datum2.getClientPno());
+        holder.CompanyText.setText(datum2.getCompany());
+        holder.TimeDateText.setText("Schedule Time : "+datum2.getDateTime().toString());
 
     }
 
@@ -460,7 +489,7 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
     private String getConverteddate(String date)
     {
         Date date2 = null;
-        SimpleDateFormat formatter1=new SimpleDateFormat("dd-mm-yy");
+        SimpleDateFormat formatter1=new SimpleDateFormat("MM-dd-yy");
         try {
             date2=formatter1.parse(date);
         } catch (ParseException e) {
@@ -480,13 +509,14 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
     public class ViewHolder extends RecyclerView.ViewHolder {
         private ImageView whatsapp;
         private ImageButton Dialbtn;
-        private TextView Name, Country, City, Phone;
+        private TextView Name, City, Phone,TimeDateText, CompanyText;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            Name = itemView.findViewById(R.id.employee_first_name);
-            Country = itemView.findViewById(R.id.employee_country);
-            City = itemView.findViewById(R.id.employee_city);
-            Phone = itemView.findViewById(R.id.employee_phone);
+            Name = itemView.findViewById(R.id.item_schedule_first_name);
+            City = itemView.findViewById(R.id.item_schedule_city);
+            Phone = itemView.findViewById(R.id.item_schedule_phone);
+            TimeDateText = itemView.findViewById(R.id.item_schedule_datetime);
+            CompanyText = itemView.findViewById(R.id.item_schedule_company);
             Dialbtn = itemView.findViewById(R.id.call_btn);
             whatsapp = itemView.findViewById(R.id.whatsapp_btn);
         }

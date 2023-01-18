@@ -16,6 +16,17 @@
             android:layout_above="@id/schedule_spin"
             android:id="@+id/schedule_recylerview"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/schedule_error"
+            android:visibility="gone"
+            android:layout_centerInParent="true"
+            android:fontFamily="@font/exo_medium"
+            android:text="No Schedule Leads Available!!"
+            android:textAlignment="center"
+            android:textSize="24sp" />
+
         <com.github.ybq.android.spinkit.SpinKitView
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/schedule_spin"

@@ -6,7 +6,6 @@ import android.view.View;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.example.autodialer.Tasks;
 import java.util.ArrayList;
 
 public class Constants {
@@ -26,7 +25,7 @@ public class Constants {
     public static Context home_context;
     public static Activity activity;
     public static View leadsview;
-    public static ArrayList<Tasks> NotificationList = new ArrayList<>();
+    //public static ArrayList<Tasks> NotificationList = new ArrayList<>();
 
     public static String BASE_URL = "https://autodialer.cc/api/";
 }

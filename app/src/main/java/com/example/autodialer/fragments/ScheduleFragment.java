@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.autodialer.R;
@@ -38,7 +39,7 @@ public class ScheduleFragment extends Fragment {
     private View view;
     public static SwipeRefreshLayout swipeRefreshLayout;
     public static ProgressDialog progress;
-    private RecyclerView recyclerView;
+    public static RecyclerView recyclerView;
     private LinearLayoutManager linearLayoutManager;
     public static SpinKitView spinKitView;
     public static boolean loading = true;
@@ -46,6 +47,7 @@ public class ScheduleFragment extends Fragment {
     public static List<Datum2> datum2List;
     public static ScheduleAdapters scheduleAdapters;
     private Context context;
+    public static TextView ScheduleError;
 
 
     @Override
@@ -57,6 +59,8 @@ public class ScheduleFragment extends Fragment {
         recyclerView = view.findViewById(R.id.schedule_recylerview);
         swipeRefreshLayout = view.findViewById(R.id.schedule_swipe);
         spinKitView = view.findViewById(R.id.schedule_spin);
+        ScheduleError = view.findViewById(R.id.schedule_error);
+
         datum2List = new ArrayList<>();
 
         linearLayoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
@@ -103,7 +107,7 @@ public class ScheduleFragment extends Fragment {
             @Override
             public void onRefresh() {
                 progress.show();
-                getData(1, context);
+                LoadDataAfterDelete(context);
             }
         });
 
@@ -126,7 +130,9 @@ public class ScheduleFragment extends Fragment {
                     public void onResponse(Call<Schedule> call, retrofit2.Response<Schedule> response) {
                         if (response.isSuccessful())
                         {
-                            progress.dismiss();
+                            if (progress!=null)
+                                progress.dismiss();
+
                             spinKitView.setVisibility(View.GONE);
                             swipeRefreshLayout.setRefreshing(false);
                             loading = true;
@@ -135,15 +141,32 @@ public class ScheduleFragment extends Fragment {
                             List<Datum2> datum2List1 = schedule.getData();
                             for (Datum2 datum2 : datum2List1)
                             {
-                                datum2List.add(datum2);
+                                SharedPreferences pref = context.getApplicationContext().getSharedPreferences("MyPref", Activity.MODE_PRIVATE);
+                                String userId = pref.getString("id","");
+                                if (userId.equals(datum2.getUserId()))
+                                    datum2List.add(datum2);
                             }
+
+                            if (datum2List.size()>0) {
+                                ScheduleError.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                            }
+                            else {
+                                ScheduleError.setVisibility(View.VISIBLE);
+                                recyclerView.setVisibility(View.GONE);
+                            }
+
                             scheduleAdapters.notifyDataSetChanged();                        }
-                        progress.dismiss();
+                        if (progress!=null)
+                            progress.dismiss();
                     }
 
                     @Override
                     public void onFailure(Call<Schedule> call, Throwable t) {
-                        progress.dismiss();
+                        ScheduleError.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.VISIBLE);
+                        if (progress!=null)
+                            progress.dismiss();
                         Toast.makeText(context, "Error : "+t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });

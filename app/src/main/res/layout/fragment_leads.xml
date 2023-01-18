@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/taskRefresh"
-    tools:context=".fragments.TasksFragment">
+    tools:context=".fragments.LeadsFragment">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -15,6 +15,17 @@
             android:layout_height="match_parent"
             android:layout_above="@id/leads_spin"
             android:id="@+id/leads_recylerview"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/leads_error"
+            android:visibility="gone"
+            android:layout_centerInParent="true"
+            android:fontFamily="@font/exo_medium"
+            android:text="No Leads Available!!"
+            android:textAlignment="center"
+            android:textSize="24sp" />
 
         <com.github.ybq.android.spinkit.SpinKitView
             xmlns:app="http://schemas.android.com/apk/res-auto"

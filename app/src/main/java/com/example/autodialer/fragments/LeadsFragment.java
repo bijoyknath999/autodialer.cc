@@ -1,11 +1,11 @@
 package com.example.autodialer.fragments;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.os.Build;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.annotation.RequiresApi;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -16,7 +16,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.autodialer.R;
@@ -24,6 +24,7 @@ import com.example.autodialer.adapters.LeadsAdapters;
 import com.example.autodialer.api.ApiInterface;
 import com.example.autodialer.api.Constants;
 import com.example.autodialer.models.Datum;
+import com.example.autodialer.models.Error;
 import com.example.autodialer.models.Leads;
 import com.github.ybq.android.spinkit.SpinKitView;
 
@@ -33,8 +34,8 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 
-public class TasksFragment extends Fragment  {
-    private RecyclerView recyclerView;
+public class LeadsFragment extends Fragment  {
+    public static RecyclerView recyclerView;
     public static LeadsAdapters leadsAdapters;
     public static ProgressDialog progress ;
     public static List<Datum> datumList;
@@ -45,14 +46,16 @@ public class TasksFragment extends Fragment  {
     public static boolean loading = true;
     int pastVisiblesItems, visibleItemCount, totalItemCount, page =1;
     private Context context;
+    public static TextView ErrorText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_tasks, container, false);
+        View view = inflater.inflate(R.layout.fragment_leads, container, false);
         swipeRefreshLayout = view.findViewById(R.id.taskRefresh);
         spinKitView = view.findViewById(R.id.leads_spin);
+        ErrorText = view.findViewById(R.id.leads_error);
 
         progress = new ProgressDialog(context);
         progress.setTitle("Loading");
@@ -99,8 +102,9 @@ public class TasksFragment extends Fragment  {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                progress.show();
-                loadData(1, context);
+                if (progress!=null)
+                    progress.show();
+                LoadDataAfterDelete(context);
             }
         });
 
@@ -110,13 +114,16 @@ public class TasksFragment extends Fragment  {
 
     public static void loadData(int page, Context context)
     {
-        ApiInterface.getApiRequestInterface().getLeads(page)
+        SharedPreferences pref = context.getSharedPreferences("MyPref", Activity.MODE_PRIVATE);
+        Constants.id = pref.getString("id","");
+        ApiInterface.getApiRequestInterface().getLeads(Integer.parseInt(Constants.id), page)
                 .enqueue(new Callback<Leads>() {
                     @Override
                     public void onResponse(Call<Leads> call, retrofit2.Response<Leads> response) {
                         if (response.isSuccessful())
                         {
-                            progress.dismiss();
+                            if (progress!=null)
+                                progress.dismiss();
                             spinKitView.setVisibility(View.GONE);
                             swipeRefreshLayout.setRefreshing(false);
                             loading = true;
@@ -126,14 +133,27 @@ public class TasksFragment extends Fragment  {
                             {
                                 datumList.add(datum);
                             }
+
+                            if (datumList.size()>0) {
+                                ErrorText.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                            }
+                            else {
+                                ErrorText.setVisibility(View.VISIBLE);
+                                recyclerView.setVisibility(View.GONE);
+                            }
                             leadsAdapters.notifyDataSetChanged();
                         }
-                        progress.dismiss();
+                        if (progress!=null)
+                            progress.dismiss();
                     }
 
                     @Override
                     public void onFailure(Call<Leads> call, Throwable t) {
-                        progress.dismiss();
+                        if (progress!=null)
+                            progress.dismiss();
+                        ErrorText.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.VISIBLE);
                         Toast.makeText(context, "Error : "+t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });

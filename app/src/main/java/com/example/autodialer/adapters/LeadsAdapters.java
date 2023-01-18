@@ -36,7 +36,7 @@ import com.example.autodialer.api.Constant_client;
 import com.example.autodialer.R;
 import com.example.autodialer.api.ApiInterface;
 import com.example.autodialer.api.Constants;
-import com.example.autodialer.fragments.TasksFragment;
+import com.example.autodialer.fragments.LeadsFragment;
 import com.example.autodialer.models.Datum;
 import com.example.autodialer.models.Recording;
 
@@ -62,9 +62,7 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
     final Calendar c = Calendar.getInstance();
     int mHour = c.get(Calendar.HOUR_OF_DAY);
     int mMinute = c.get(Calendar.MINUTE);
-    String Datee,Timee;
-    String email, Feedback, Schedule_res="No";
-    String del_id;
+    String email, Feedback, Schedule_res="No", Datee,Timee,del_id, w_feed, lead_id, campaign_id, company_name;
 
 
 
@@ -76,7 +74,7 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
     @NonNull
     @Override
     public LeadsAdapters.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.tasks, parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_leads, parent,false);
         return new ViewHolder(view);
     }
 
@@ -95,15 +93,15 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
         progress.setMessage("Wait while loading...");
         progress.setCancelable(false);
 
+        Constant_client.id = datum.getId().toString();
+        Constant_client.name = datum.getName();
+        Constant_client.city = datum.getCity();
+        Constant_client.country = datum.getCompany();
+        Constant_client.phone = datum.getPhone();
+
         holder.Whatsappbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Constant_client.id = datum.getId().toString();
-                Constant_client.name = datum.getName();
-                Constant_client.city = datum.getCity();
-                Constant_client.country = datum.getCompany();
-                Constant_client.phone = datum.getPhone();
 
                 Uri uri = Uri.parse("https://api.whatsapp.com/send?phone=" + holder.PhoneText.getText().toString());
 
@@ -201,7 +199,8 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
                 submit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        progress.show();
+                        if (progress!=null)
+                            progress.show();
 
                         int selectedId = feedback.getCheckedRadioButtonId();
                         if (selectedId == -1) {
@@ -213,6 +212,9 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
 
                         }
                         del_id = datum.getId().toString();
+                        campaign_id = datum.getCampaign_id().toString();
+                        lead_id = datum.getLead_id().toString();
+                        company_name = datum.getCompany();
 
                         String date_time;
                         if(Schedule_res.equals("Yes")){
@@ -233,9 +235,14 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
                             date_time= "00:00";
                         }
 
-                        ApiInterface.getApiRequestInterface().saveRecording(userId,admin_id,Feedback,
-                                        w_feedback.getText().toString(),Schedule_res,"",Constant_client.phone,
-                                        Constant_client.name,Constant_client.city,date_time,"00:00")
+                        w_feed = w_feedback.getText().toString();
+                        if (w_feed.isEmpty())
+                            w_feed = "NA";
+
+                        ApiInterface.getApiRequestInterface().saveRecording(del_id,userId,admin_id,Feedback,w_feed
+                                        ,Schedule_res,"",Constant_client.phone,
+                                        Constant_client.name,Constant_client.city,date_time,
+                                        "00:00",company_name,campaign_id,lead_id)
                                 .enqueue(new Callback<Recording>() {
                                     @Override
                                     public void onResponse(Call<Recording> call, Response<Recording> response) {
@@ -246,22 +253,25 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
                                                         public void onResponse(Call<String> call, Response<String> response) {
                                                             if (response.isSuccessful())
                                                             {
-                                                                TasksFragment.LoadDataAfterDelete(context);
+                                                                LeadsFragment.LoadDataAfterDelete(context);
                                                                 popupWindow.dismiss();
                                                                 Toast.makeText(context, "Submitted Successfully", Toast.LENGTH_SHORT).show();
                                                             }
-                                                            progress.dismiss();
+                                                            if (progress!=null)
+                                                                progress.dismiss();
                                                         }
 
                                                         @Override
                                                         public void onFailure(Call<String> call, Throwable t) {
-                                                            progress.dismiss();
+                                                            if (progress!=null)
+                                                                progress.dismiss();
                                                             Toast.makeText( context, "Error : "+t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                                                         }
                                                     });
                                         }
                                         else {
-                                            progress.dismiss();
+                                            if (progress!=null)
+                                                progress.dismiss();
                                             try {
                                                 JSONObject jObjError = new JSONObject(response.errorBody().string());
                                                 Toast.makeText(context, ""+jObjError.getString("message"), Toast.LENGTH_LONG).show();
@@ -274,7 +284,8 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
 
                                     @Override
                                     public void onFailure(Call<Recording> call, Throwable t) {
-                                        progress.dismiss();
+                                        if (progress!=null)
+                                            progress.dismiss();
                                         Toast.makeText( context, "Error : "+t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                                     }
                                 });
@@ -289,12 +300,6 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onClick(View v) {
-                System.out.println("Call");
-                Constant_client.id = datum.getId().toString();
-                Constant_client.name = datum.getName();
-                Constant_client.city = datum.getCity();
-                Constant_client.country = datum.getCompany();
-                Constant_client.phone = datum.getPhone();
 
                 Intent callIntent = new Intent(Intent.ACTION_CALL);
                 callIntent.setData(Uri.parse("tel:" + holder.PhoneText.getText()));
@@ -394,7 +399,8 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
                 submit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        progress.show();
+                        if (progress!=null)
+                            progress.show();
 
                         int selectedId = feedback.getCheckedRadioButtonId();
                         if (selectedId == -1) {
@@ -406,6 +412,9 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
 
                         }
                         del_id = datum.getId().toString();
+                        campaign_id = datum.getCampaign_id().toString();
+                        lead_id = datum.getLead_id().toString();
+                        company_name = datum.getCompany();
 
                         String date_time;
                         if(Schedule_res.equals("Yes")){
@@ -426,9 +435,14 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
                             date_time= "00:00";
                         }
 
-                        ApiInterface.getApiRequestInterface().saveRecording(userId,admin_id,Feedback,
-                                w_feedback.getText().toString(),Schedule_res,"",Constant_client.phone,
-                                Constant_client.name,Constant_client.city,date_time,"00:00")
+                        w_feed = w_feedback.getText().toString();
+                        if (w_feed.isEmpty())
+                            w_feed = "NA";
+
+                        ApiInterface.getApiRequestInterface().saveRecording(del_id,userId,admin_id,Feedback,
+                                w_feed,Schedule_res,"",Constant_client.phone,
+                                Constant_client.name,Constant_client.city,date_time,
+                                        "00:00",company_name,campaign_id,lead_id)
                                 .enqueue(new Callback<Recording>() {
                             @Override
                             public void onResponse(Call<Recording> call, Response<Recording> response) {
@@ -439,22 +453,25 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
                                                 public void onResponse(Call<String> call, Response<String> response) {
                                                     if (response.isSuccessful())
                                                     {
-                                                        TasksFragment.LoadDataAfterDelete(context);
+                                                        LeadsFragment.LoadDataAfterDelete(context);
                                                         popupWindow.dismiss();
                                                         Toast.makeText(context, "Submitted Successfully", Toast.LENGTH_SHORT).show();
                                                     }
-                                                    progress.dismiss();
+                                                    if (progress!=null)
+                                                        progress.dismiss();
                                                 }
 
                                                 @Override
                                                 public void onFailure(Call<String> call, Throwable t) {
-                                                    progress.dismiss();
+                                                    if (progress!=null)
+                                                        progress.dismiss();
                                                     Toast.makeText( context, "Error : "+t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                                                 }
                                             });
                                 }
                                 else {
-                                    progress.dismiss();
+                                    if (progress!=null)
+                                        progress.dismiss();
                                     try {
                                         JSONObject jObjError = new JSONObject(response.errorBody().string());
                                         Toast.makeText(context, ""+jObjError.getString("message"), Toast.LENGTH_LONG).show();
@@ -467,7 +484,8 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
 
                             @Override
                             public void onFailure(Call<Recording> call, Throwable t) {
-                                progress.dismiss();
+                                if (progress!=null)
+                                    progress.dismiss();
                                 Toast.makeText( context, "Error : "+t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -478,7 +496,7 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
         });
 
         holder.NameText.setText(datum.getName());
-        holder.CountryText.setText(datum.getCompany());
+        holder.CompanyText.setText(datum.getCompany());
         holder.CityText.setText(datum.getCity());
         holder.PhoneText.setText(datum.getPhone());
 
@@ -519,16 +537,16 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView NameText, CountryText, CityText, PhoneText;
+        private TextView NameText, CompanyText, CityText, PhoneText;
         private ImageButton DialBtn;
         private ImageView Whatsappbtn;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            NameText = itemView.findViewById(R.id.employee_first_name);
-            CountryText = itemView.findViewById(R.id.employee_country);
-            CityText = itemView.findViewById(R.id.employee_city);
-            PhoneText = itemView.findViewById(R.id.employee_phone);
+            NameText = itemView.findViewById(R.id.item_lead_full_name);
+            CompanyText = itemView.findViewById(R.id.item_lead_company);
+            CityText = itemView.findViewById(R.id.item_lead_city);
+            PhoneText = itemView.findViewById(R.id.item_lead_phone);
             DialBtn = itemView.findViewById(R.id.call_btn);
             Whatsappbtn = itemView.findViewById(R.id.whatsapp_btn);
         }

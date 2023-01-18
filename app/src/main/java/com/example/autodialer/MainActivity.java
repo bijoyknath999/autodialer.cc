@@ -1,5 +1,6 @@
 package com.example.autodialer;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -12,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -39,12 +41,16 @@ import okhttp3.Response;
 import retrofit2.Call;
 import retrofit2.Callback;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PermissionUtil.PermissionsCallBack{
     Button login_btn;
     EditText email, password;
     TextView mLink;
     private static final int REQUEST_PHONE_CALL = 1;
+    private static final int REQUEST_NOTIFICATIONS = 2;
     private ProgressDialog progress;
+
+    private static final String TAG = "MainActivity";
+
 
     @Override
     protected void onStart() {
@@ -74,9 +80,8 @@ public class MainActivity extends AppCompatActivity {
         login_btn = (Button) findViewById(R.id.login_button);
         email = (EditText) findViewById(R.id.userName);
         password = (EditText) findViewById(R.id.userPassword);
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CALL_PHONE}, REQUEST_PHONE_CALL);
-        }
+
+        requestPermissions();
 
         progress = new ProgressDialog(MainActivity.this);
         progress.setTitle("Loading");
@@ -86,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
         login_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
 
                 String emailstr = email.getText().toString();
                 String passwordstr = password.getText().toString();
@@ -151,7 +158,13 @@ public class MainActivity extends AppCompatActivity {
                                     });
                         } else {
                             progress.dismiss();
-                            Toast.makeText(getApplicationContext(), "Login Failed", Toast.LENGTH_SHORT).show();
+                            try {
+                                JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                Toast.makeText(MainActivity.this, ""+jObjError.getString("message"), Toast.LENGTH_LONG).show();
+                            } catch (Exception e) {
+                                System.out.println("Error :"+e.getLocalizedMessage());
+                                Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                            }
                         }
                     }
 
@@ -161,6 +174,33 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Error : " + t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    public void requestPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (PermissionUtil.checkAndRequestPermissions(this,
+                    Manifest.permission.CALL_PHONE,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                    Manifest.permission.ACCESS_NOTIFICATION_POLICY)) {
+                Log.i(TAG, "Permissions are granted. Good to go!");
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        PermissionUtil.onRequestPermissionsResult(this, requestCode, permissions, grantResults, this);
+    }
+
+    @Override
+    public void permissionsGranted() {
+        Toast.makeText(this, "Permissions granted!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void permissionsDenied() {
+        Toast.makeText(this, "Permissions Denied!", Toast.LENGTH_SHORT).show();
     }
 }
 

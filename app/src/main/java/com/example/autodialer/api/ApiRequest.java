@@ -19,12 +19,14 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiRequest {
-    @GET("leads")
-    Call<Leads> getLeads(@Query("page") int page);
+    @GET("leads/{user_id}")
+    Call<Leads> getLeads(@Path("user_id") int user_id,
+                         @Query("page") int page);
 
     @FormUrlEncoded
     @POST("recording")
-    Call<Recording> saveRecording(@Field("user_id") String user_id,
+    Call<Recording> saveRecording(@Field("id") String id,
+                                  @Field("user_id") String user_id,
                                   @Field("admin_id") String admin_id,
                                   @Field("feedback") String feedback,
                                   @Field("w_feedback") String w_feedback,
@@ -34,7 +36,10 @@ public interface ApiRequest {
                                   @Field("client_name") String client_name,
                                   @Field("client_city") String client_city,
                                   @Field("date_time") String date_time,
-                                  @Field("call_duration") String call_duration);
+                                  @Field("call_duration") String call_duration,
+                                  @Field("company") String company,
+                                  @Field("campaign_id") String campaign_id,
+                                  @Field("lead_id") String lead_id);
 
     @FormUrlEncoded
     @POST("login")
@@ -54,22 +59,32 @@ public interface ApiRequest {
     Call<Schedule> getScheduledList(@Path("id") String id,
                                     @Query("page") int page);
 
-    @FormUrlEncoded
     @PUT("update")
-    Call<Recording> updateRecording(@Field("id") String id,
-                                    @Field("user_id") String user_id,
-                                    @Field("admin_id") String admin_id,
-                                    @Field("feedback") String feedback,
-                                    @Field("w_feedback") String w_feedback,
-                                    @Field("scheduled") String scheduled,
-                                    @Field("recording") String recording,
-                                    @Field("client_pno") String client_pno,
-                                    @Field("client_name") String client_name,
-                                    @Field("client_city") String client_city,
-                                    @Field("date_time") String date_time,
-                                    @Field("call_duration") String call_duration);
+    Call<Recording> updateRecording(@Query("id") int id,
+                                    @Query("user_id") String user_id,
+                                    @Query("admin_id") String admin_id,
+                                    @Query("feedback") String feedback,
+                                    @Query("w_feedback") String w_feedback,
+                                    @Query("scheduled") String scheduled,
+                                    @Query("recording") String recording,
+                                    @Query("client_pno") String client_pno,
+                                    @Query("client_name") String client_name,
+                                    @Query("client_city") String client_city,
+                                    @Query("date_time") String date_time,
+                                    @Query("call_duration") String call_duration,
+                                    @Query("company") String company,
+                                    @Query("campaign_id") String campaign_id,
+                                    @Query("lead_id") String lead_id);
 
     @GET("updateuser/{id}/Inactive")
     Call<String> saveStatusInActive(@Path("id") String id);
+
+    @GET("gettotalleads/{user_id}")
+    Call<String> getTotalLeads(@Path("user_id") int user_id);
+
+    @FormUrlEncoded
+    @POST("getschedulewithtime")
+    Call<List<Recording>> getScheduleAll(@Field("user_id") String user_id,
+                                         @Field("admin_id") String admin_id);
 
 }

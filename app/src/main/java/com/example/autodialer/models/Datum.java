@@ -35,6 +35,12 @@ public class Datum {
     @SerializedName("updated_at")
     @Expose
     private String updatedAt;
+    @SerializedName("campaign_id")
+    @Expose
+    private String campaign_id;
+    @SerializedName("lead_id")
+    @Expose
+    private String lead_id;
 
     public Integer getId() {
         return id;
@@ -116,4 +122,19 @@ public class Datum {
         this.updatedAt = updatedAt;
     }
 
+    public String getCampaign_id() {
+        return campaign_id;
+    }
+
+    public void setCampaign_id(String campaign_id) {
+        this.campaign_id = campaign_id;
+    }
+
+    public String getLead_id() {
+        return lead_id;
+    }
+
+    public void setLead_id(String lead_id) {
+        this.lead_id = lead_id;
+    }
 }

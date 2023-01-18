@@ -1,71 +1,64 @@
 package com.example.autodialer;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 
+import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.os.AsyncTask;
-import android.os.Build;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.SystemClock;
 import android.view.MenuItem;
-
+import com.example.autodialer.api.ApiInterface;
 import com.example.autodialer.api.Constants;
 import com.example.autodialer.fragments.DialerFragment;
 import com.example.autodialer.fragments.ScheduleFragment;
 import com.example.autodialer.fragments.SettingsFragment;
-import com.example.autodialer.fragments.TasksFragment;
+import com.example.autodialer.fragments.LeadsFragment;
+import com.example.autodialer.models.Recording;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class HomeActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener{
     BottomNavigationView bottom_nv;
     DialerFragment df;
-    TasksFragment tf;
+    LeadsFragment tf;
     SettingsFragment sf;
     ScheduleFragment Sf;
-    final Handler handler = new Handler();
-    private static final int REQUEST_CODE = 0;
-    private DevicePolicyManager mDPM;
-    private ComponentName mAdminName;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         df=new DialerFragment();
-        tf=new TasksFragment();
+        tf=new LeadsFragment();
         sf=new SettingsFragment();
         Sf=new ScheduleFragment();
         bottom_nv=findViewById(R.id.bottom_nv);
         bottom_nv.setOnNavigationItemSelectedListener(this);
         getSupportFragmentManager().beginTransaction().replace(R.id.containFrag,df).commit();
 
-        NotificationRequest nr = new NotificationRequest();
-        nr.execute();
-
+        SharedPreferences pref = getSharedPreferences("MyPref", Activity.MODE_PRIVATE);
+        Constants.adminID = pref.getString("admin_id","");
+        Constants.id = pref.getString("id","");
+        getScheduleTime();
         Constants.home_context=getApplicationContext();
-
     }
 
     @Override
@@ -87,91 +80,76 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
         }
         return false;
     }
-    public void show(String time,Context c){
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(c, "notify_001");
 
+    private void getScheduleTime() {
+        ApiInterface.getApiRequestInterface().getScheduleAll(Constants.id,Constants.adminID)
+                .enqueue(new Callback<List<Recording>>() {
+                    @Override
+                    public void onResponse(Call<List<Recording>> call, Response<List<Recording>> response) {
+                        if (response.isSuccessful())
+                        {
+                            List<Recording> recordingList = response.body();
+                            if (recordingList.size()>0)
+                            {
+                                for (int i=0; i<recordingList.size(); i++)
+                                {
+                                    Tools tools = new Tools();
+                                    if (tools.isValid(recordingList.get(i).getDateTime()))
+                                    {
+                                        try {
+                                            if (isValidDate(recordingList.get(i).getDateTime()))
+                                            {
+                                                scheduleNotification(getDelay(recordingList.get(i).getDateTime()),"Call Schedule","At "+recordingList.get(i).getDateTime());
+                                            }
+                                        } catch (ParseException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
-        NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
-        bigText.bigText("At "+time);
-        bigText.setBigContentTitle("Call Schedule");
-        //bigText.setSummaryText("Text in detail");
+                    @Override
+                    public void onFailure(Call<List<Recording>> call, Throwable t) {
 
-
-        mBuilder.setSmallIcon(R.mipmap.ic_launcher_round);
-        //mBuilder.setContentTitle("Client Name: Ali");
-       // mBuilder.setContentText("+91345455665");
-        mBuilder.setPriority(Notification.PRIORITY_MAX);
-        mBuilder.setStyle(bigText);
-
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-// === Removed some obsoletes
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        {
-            String channelId = "Your_channel_id";
-            NotificationChannel channel = new NotificationChannel(
-                    channelId,
-                    "Channel human readable title",
-                    NotificationManager.IMPORTANCE_HIGH);
-            mNotificationManager.createNotificationChannel(channel);
-            mBuilder.setChannelId(channelId);
-        }
-
-        mNotificationManager.notify(0, mBuilder.build());
+                    }
+                });
     }
-    public class NotificationRequest extends AsyncTask {
 
-        @Override
-        protected Object doInBackground(Object[] objects) {
-            OkHttpClient client = new OkHttpClient();
+    private void scheduleNotification(long delay, String title, String content) {
 
-            Request request = new Request.Builder()
-                    .url("http://192.168.0.11:8000/api/schedule/"+Constants.adminID)
-                    .get()
-                    .build();
+        Intent notificationIntent = new Intent(HomeActivity.this, NotificationReceiver.class);
+        notificationIntent.putExtra("title",title);
+        notificationIntent.putExtra("content",content);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(HomeActivity.this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        long futureInMillis = SystemClock.elapsedRealtime() + delay;
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+    }
 
+    public static boolean isValidDate(String pDateString) throws ParseException {
+        Date date = new SimpleDateFormat("dd MMM yyyy hh:mm a").parse(pDateString);
+        return new Date().before(date);
+    }
 
-            try {
-                Response response = client.newCall(request).execute();
-                System.out.println(response);
+    private long getDelay (String datetime) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM yyyy hh:mm a");
 
-                JSONArray jsonArray = new JSONArray(response.body().string());
-                System.out.println(jsonArray);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jObject = jsonArray.getJSONObject(i);
-                    if(Constants.adminID.equals(jObject.getString("admin_id"))&& jObject.getString("scheduled").equals("Yes")){
-                        //id = jObject.getString("id");
-                       // name = jObject.getString("client_name");
-                        //city = jObject.getString("client_city");
-                       // phone = jObject.getString("client_pno");
-                        Constants.Schedule_notification.add(jObject.getString("date_time"));
-                        //tasks = new Tasks(id,name,country,city,phone);
-                        //TaskList.add(tasks);
-                       // System.out.println("Heloo"+tasks.toString());
-                    }
-                }
+        Date date = new Date();
+        String time2 = simpleDateFormat.format(date);
 
-                System.out.println("Notification"+Constants.Schedule_notification.toString());
-                for (int i = 0; i < Constants.Schedule_notification.size(); i++) {
-                    String date = new SimpleDateFormat("dd MMM yyyy hh:mm a", Locale.getDefault()).format(new Date());
-                    System.out.println("Now Date:" + date);
-
-                    if (Constants.Schedule_notification.get(i).equals(date)) {
-                        show(Constants.Schedule_notification.get(i),getApplicationContext());
-                    }
-                }
-            } catch (JSONException | IOException e) {
-                e.printStackTrace();
-            }
-            return null;
+        Date date1 = null, date2 = null;
+        try {
+            date1 = simpleDateFormat.parse(datetime);
+            date2 = simpleDateFormat.parse(time2);
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
-        @Override
-        protected void onPostExecute(Object o) {
-            super.onPostExecute(o);
-            }
-
+        long difference = date1.getTime() - date2.getTime();
+        long diffInSec = TimeUnit.MILLISECONDS.toMillis(difference);
+        return diffInSec;
     }
 
 }

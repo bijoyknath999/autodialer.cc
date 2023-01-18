@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "com.autodialer.autodialer.cc"
-        minSdk 21
+        minSdk 23
         targetSdk 33
         versionCode 3
         versionName "3.0"
