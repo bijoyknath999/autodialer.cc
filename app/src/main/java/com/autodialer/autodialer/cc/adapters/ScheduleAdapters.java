@@ -30,7 +30,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.autodialer.autodialer.cc.HomeActivity;
 import com.autodialer.autodialer.cc.R;
+import com.autodialer.autodialer.cc.Tools;
 import com.autodialer.autodialer.cc.api.Constant_client;
 import com.autodialer.autodialer.cc.api.Constants;
 import com.autodialer.autodialer.cc.fragments.LeadsFragment;
@@ -65,11 +67,12 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
     LeadsFragment TF=new LeadsFragment();
     String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
     Button dd,tt;
-    String Datee,Timee, campaign_id, lead_id,company_name, w_feed;
+    String Datee,Timee, campaign_id, lead_id,company_name, w_feed, callduration;
     final Calendar myCalendar= Calendar.getInstance();
     final Calendar c = Calendar.getInstance();
     int mHour = c.get(Calendar.HOUR_OF_DAY);
     int mMinute = c.get(Calendar.MINUTE);
+    Tools tools = new Tools();
 
     public ScheduleAdapters(List<Datum2> datum2List, Context context) {
         this.datum2List = datum2List;
@@ -109,7 +112,6 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
                 Uri uri = Uri.parse("https://api.whatsapp.com/send?phone=" + holder.Phone.getText().toString());
                 Intent sendIntent = new Intent(Intent.ACTION_VIEW, uri);
                 context.startActivity(sendIntent);
-
                 Constants.cal1 = Calendar.getInstance().getTimeInMillis();
                 View popupView = inflater.inflate(R.layout.feedback_popup, null);
 
@@ -241,14 +243,10 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
                         if (w_feed.isEmpty())
                             w_feed = "NA";
 
-                        System.out.println("Datum : "+company_name+" "+campaign_id+" "+lead_id+" "+del_id+" "+w_feed+" "+userId+" "
-                        +admin_id+" "+Feedback+" "+Schedule_res+" "+datum2.getClientPno()+" "+date_time+" "+datum2.getClientCity()+
-                                " "+datum2.getClientName());
-
                         ApiInterface.getApiRequestInterface().updateRecording(Integer.parseInt(del_id),userId,admin_id,Feedback,
                                 w_feed,Schedule_res,"",datum2.getClientPno(),
                                         datum2.getClientName(),datum2.getClientCity(),date_time,
-                                        "00:00",company_name,campaign_id,lead_id)
+                                        "00:00:00",company_name,campaign_id,lead_id)
                                 .enqueue(new Callback<Recording>() {
                                     @Override
                                     public void onResponse(Call<Recording> call, Response<Recording> response) {
@@ -292,6 +290,8 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
                 callIntent.setData(Uri.parse("tel:" + holder.Phone.getText()));
                 context.startActivity(callIntent);
                 Constants.cal1 = Calendar.getInstance().getTimeInMillis();
+                tools.startTimer(context);
+
                 View popupView = inflater.inflate(R.layout.feedback_popup, null);
 
                 int width = RelativeLayout.LayoutParams.WRAP_CONTENT;
@@ -423,15 +423,21 @@ public class ScheduleAdapters extends RecyclerView.Adapter<ScheduleAdapters.View
                         if (w_feed.isEmpty())
                             w_feed = "NA";
 
+                        callduration = pref.getString("callduration","00:00:00");
+
                         ApiInterface.getApiRequestInterface().updateRecording(Integer.parseInt(del_id),userId,admin_id,Feedback,
                                         w_feed,Schedule_res,"",datum2.getClientPno(),
                                         datum2.getClientName(),datum2.getClientCity(),date_time,
-                                        "00:00",company_name,campaign_id,lead_id)
+                                        callduration,company_name,campaign_id,lead_id)
                                 .enqueue(new Callback<Recording>() {
                                     @Override
                                     public void onResponse(Call<Recording> call, Response<Recording> response) {
                                         if (response.isSuccessful())
                                         {
+                                            SharedPreferences.Editor editor = pref.edit();
+                                            editor.putString("callduration","00:00:00");
+                                            editor.apply();
+                                            tools.stoptimer();
                                             ScheduleFragment.LoadDataAfterDelete(context);
                                             if (progress!=null)
                                                 progress.dismiss();

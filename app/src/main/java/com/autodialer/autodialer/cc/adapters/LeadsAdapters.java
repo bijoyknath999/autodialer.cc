@@ -63,9 +63,8 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
     final Calendar c = Calendar.getInstance();
     int mHour = c.get(Calendar.HOUR_OF_DAY);
     int mMinute = c.get(Calendar.MINUTE);
-    String email, Feedback, Schedule_res="No", Datee,Timee,del_id, w_feed, lead_id, campaign_id, company_name;
-
-
+    String Feedback, Schedule_res="No", Datee, Timee, del_id, w_feed, lead_id, campaign_id, company_name, callduration;
+    Tools tools = new Tools();
 
     public LeadsAdapters(Context context, List<Datum> datumList) {
         this.context = context;
@@ -243,7 +242,7 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
                         ApiInterface.getApiRequestInterface().saveRecording(del_id,userId,admin_id,Feedback,w_feed
                                         ,Schedule_res,"",Constant_client.phone,
                                         Constant_client.name,Constant_client.city,date_time,
-                                        "00:00",company_name,campaign_id,lead_id)
+                                        "00:00:00",company_name,campaign_id,lead_id)
                                 .enqueue(new Callback<Recording>() {
                                     @Override
                                     public void onResponse(Call<Recording> call, Response<Recording> response) {
@@ -310,6 +309,7 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
                 callIntent.setData(Uri.parse("tel:" + holder.PhoneText.getText()));
                 context.startActivity(callIntent);
                 Constants.cal1 = Calendar.getInstance().getTimeInMillis();
+                tools.startTimer(context);
 
 
                 // Constants.time= Time.valueOf(Constants.currentTime);
@@ -444,10 +444,12 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
                         if (w_feed.isEmpty())
                             w_feed = "NA";
 
+                        callduration = pref.getString("callduration","00:00:00");
+
                         ApiInterface.getApiRequestInterface().saveRecording(del_id,userId,admin_id,Feedback,
                                 w_feed,Schedule_res,"",Constant_client.phone,
                                 Constant_client.name,Constant_client.city,date_time,
-                                        "00:00",company_name,campaign_id,lead_id)
+                                        callduration,company_name,campaign_id,lead_id)
                                 .enqueue(new Callback<Recording>() {
                             @Override
                             public void onResponse(Call<Recording> call, Response<Recording> response) {
@@ -462,6 +464,10 @@ public class LeadsAdapters extends RecyclerView.Adapter<LeadsAdapters.ViewHolder
                                                             Tools tools = new Tools();
                                                             tools.scheduleNotification(context,tools.getDelay(date_time),"Call Schedule","At "+date_time);
                                                         }
+                                                        SharedPreferences.Editor editor = pref.edit();
+                                                        editor.putString("callduration","00:00:00");
+                                                        editor.apply();
+                                                        tools.stoptimer();
                                                         LeadsFragment.LoadDataAfterDelete(context);
                                                         popupWindow.dismiss();
                                                         Toast.makeText(context, "Submitted Successfully", Toast.LENGTH_SHORT).show();

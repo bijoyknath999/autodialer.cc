@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.autodialer.autodialer.cc.R;
+import com.autodialer.autodialer.cc.Tools;
 import com.autodialer.autodialer.cc.models.Datum2;
 import com.autodialer.autodialer.cc.adapters.ScheduleAdapters;
 import com.autodialer.autodialer.cc.api.ApiInterface;
@@ -192,7 +193,7 @@ public class ScheduleFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        long cal2 = Calendar.getInstance().getTimeInMillis();
+        /*long cal2 = Calendar.getInstance().getTimeInMillis();
         long diff = cal2 - Constants.cal1;
         long diffSeconds = (diff / 1000)-3;
         long diffMinutes = diff / (60 * 1000);
@@ -203,7 +204,6 @@ public class ScheduleFragment extends Fragment {
         else if(diffSeconds<60 && diffSeconds>0) {
             Constants.Call_duration="00:"+diffSeconds+" Sec";
             System.out.println("Call Duration in Sec: " + Constants.Call_duration);
-        }
-
+        }*/
     }
 }
