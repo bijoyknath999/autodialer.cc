@@ -59,6 +59,10 @@ public interface ApiRequest {
     Call<Schedule> getScheduledList(@Path("id") String id,
                                     @Query("page") int page);
 
+    @GET("noanswer/{id}")
+    Call<Schedule> getNoAnswerList(@Path("id") String id,
+                                    @Query("page") int page);
+
     @PUT("update")
     Call<Recording> updateRecording(@Query("id") int id,
                                     @Query("user_id") String user_id,

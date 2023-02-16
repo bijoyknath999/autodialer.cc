@@ -14,6 +14,10 @@
         android:title="Schedule"
         android:icon="@drawable/ic_baseline_schedule_24"/>
     <item
+        android:id="@+id/NoAnswer"
+        android:title="No Answer"
+        android:icon="@drawable/ic_call_end"/>
+    <item
         android:id="@+id/Setting"
         android:title="Settings"
         android:icon="@drawable/ic_settings"/>

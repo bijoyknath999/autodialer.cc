@@ -3,8 +3,11 @@ package com.autodialer.autodialer.cc;
 import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.os.Build;
 import androidx.core.app.NotificationCompat;
 
@@ -37,9 +40,21 @@ class NotificationHelper extends ContextWrapper {
         return notificationManager;
     }
     public NotificationCompat.Builder getChannelNotification() {
+        Intent resultIntent;
+        resultIntent = new Intent(this, HomeActivity.class);
+        resultIntent.putExtra("notify",true);
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addNextIntentWithParentStack(resultIntent);
+
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(0,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
         return new NotificationCompat.Builder(getApplicationContext(), channelID)
                 .setContentTitle(title)
                 .setContentText(content)
+                .setContentIntent(resultPendingIntent)
                 .setSmallIcon(R.drawable.ic_notifications);
     }
 }

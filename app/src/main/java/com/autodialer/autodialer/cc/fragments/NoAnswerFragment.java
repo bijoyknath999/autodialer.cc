@@ -17,19 +17,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.autodialer.autodialer.cc.R;
-import com.autodialer.autodialer.cc.models.Datum2;
+import com.autodialer.autodialer.cc.adapters.NoAnswerAdapters;
 import com.autodialer.autodialer.cc.adapters.ScheduleAdapters;
 import com.autodialer.autodialer.cc.api.ApiInterface;
 import com.autodialer.autodialer.cc.api.Constants;
+import com.autodialer.autodialer.cc.models.Datum2;
 import com.autodialer.autodialer.cc.models.Schedule;
 import com.github.ybq.android.spinkit.SpinKitView;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 
-public class ScheduleFragment extends Fragment {
+public class NoAnswerFragment extends Fragment {
+
     private View view;
     public static SwipeRefreshLayout swipeRefreshLayout;
     public static ProgressDialog progress;
@@ -39,29 +44,27 @@ public class ScheduleFragment extends Fragment {
     public static boolean loading = true;
     int pastVisiblesItems, visibleItemCount, totalItemCount, page =1;
     public static List<Datum2> datum2List;
-    public static ScheduleAdapters scheduleAdapters;
+    public static NoAnswerAdapters noAnswerAdapters;
     private Context context;
-    public static TextView ScheduleError;
-
+    public static TextView noAnswerError;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        view = inflater.inflate(R.layout.fragment_schedule, container, false);
-
-        recyclerView = view.findViewById(R.id.schedule_recylerview);
-        swipeRefreshLayout = view.findViewById(R.id.schedule_swipe);
-        spinKitView = view.findViewById(R.id.schedule_spin);
-        ScheduleError = view.findViewById(R.id.schedule_error);
+        View view = inflater.inflate(R.layout.fragment_no_answer, container, false);
+        recyclerView = view.findViewById(R.id.no_answer_recylerview);
+        swipeRefreshLayout = view.findViewById(R.id.no_answer_swipe);
+        spinKitView = view.findViewById(R.id.no_answer_spin);
+        noAnswerError = view.findViewById(R.id.no_answer_error);
 
         datum2List = new ArrayList<>();
 
         linearLayoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        scheduleAdapters = new ScheduleAdapters(datum2List,context);
-        recyclerView.setAdapter(scheduleAdapters);
+        noAnswerAdapters = new NoAnswerAdapters(datum2List,context);
+        recyclerView.setAdapter(noAnswerAdapters);
 
         SharedPreferences pref = context.getSharedPreferences("AutoDialer", Activity.MODE_PRIVATE);
         Constants.adminID = pref.getString("admin_id","");
@@ -111,14 +114,13 @@ public class ScheduleFragment extends Fragment {
         progress.setMessage("Wait while loading...");
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
-
         return view;
     }
 
     public static void getData(int page, Context context)
     {
 
-        ApiInterface.getApiRequestInterface().getScheduledList(Constants.adminID,page)
+        ApiInterface.getApiRequestInterface().getNoAnswerList(Constants.adminID,page)
                 .enqueue(new Callback<Schedule>() {
                     @Override
                     public void onResponse(Call<Schedule> call, retrofit2.Response<Schedule> response) {
@@ -142,22 +144,23 @@ public class ScheduleFragment extends Fragment {
                             }
 
                             if (datum2List.size()>0) {
-                                ScheduleError.setVisibility(View.GONE);
+                                noAnswerError.setVisibility(View.GONE);
                                 recyclerView.setVisibility(View.VISIBLE);
                             }
                             else {
-                                ScheduleError.setVisibility(View.VISIBLE);
+                                noAnswerError.setVisibility(View.VISIBLE);
                                 recyclerView.setVisibility(View.GONE);
                             }
 
-                            scheduleAdapters.notifyDataSetChanged();                        }
+                            noAnswerAdapters.notifyDataSetChanged();
+                        }
                         if (progress!=null)
                             progress.dismiss();
                     }
 
                     @Override
                     public void onFailure(Call<Schedule> call, Throwable t) {
-                        ScheduleError.setVisibility(View.GONE);
+                        noAnswerError.setVisibility(View.GONE);
                         recyclerView.setVisibility(View.VISIBLE);
                         if (progress!=null)
                             progress.dismiss();
@@ -183,21 +186,5 @@ public class ScheduleFragment extends Fragment {
     public void onStop() {
         super.onStop();
         if (progress != null) { progress.dismiss(); progress = null; }
-    }
-    @Override
-    public void onResume() {
-        super.onResume();
-        /*long cal2 = Calendar.getInstance().getTimeInMillis();
-        long diff = cal2 - Constants.cal1;
-        long diffSeconds = (diff / 1000)-3;
-        long diffMinutes = diff / (60 * 1000);
-        if(diffSeconds>=60){
-            Constants.Call_duration=diffMinutes+":00 Min";
-            System.out.println("Call Duration in Minutes: "+Constants.Call_duration);
-        }
-        else if(diffSeconds<60 && diffSeconds>0) {
-            Constants.Call_duration="00:"+diffSeconds+" Sec";
-            System.out.println("Call Duration in Sec: " + Constants.Call_duration);
-        }*/
     }
 }

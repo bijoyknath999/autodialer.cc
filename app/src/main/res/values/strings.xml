@@ -2,4 +2,6 @@
     <string name="app_name">AutoDialer</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="link"><a href="https://autodialer.cc/registerform">First Register At Our Website To Login</a></string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
