@@ -1,6 +1,7 @@
 package com.autodialer.autodialer.cc.api;
 
 import com.autodialer.autodialer.cc.models.Completed;
+import com.autodialer.autodialer.cc.models.Datum2;
 import com.autodialer.autodialer.cc.models.Login;
 import com.autodialer.autodialer.cc.models.Recording;
 import com.autodialer.autodialer.cc.models.Schedule;
@@ -62,6 +63,12 @@ public interface ApiRequest {
     @GET("noanswer/{id}")
     Call<Schedule> getNoAnswerList(@Path("id") String id,
                                     @Query("page") int page);
+
+    @FormUrlEncoded
+    @POST("searchnoanswer")
+    Call<List<Datum2>> searchnoanser(@Field("user_id") String user_id,
+                                     @Field("admin_id") String admin_id,
+                                     @Field("phone") String client_pno);
 
     @PUT("update")
     Call<Recording> updateRecording(@Query("id") int id,

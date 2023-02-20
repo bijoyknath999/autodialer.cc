@@ -10,9 +10,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <SearchView
+            android:id="@+id/no_answer_searchView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:queryHint="Search Here"
+            android:iconifiedByDefault="false"
+            android:layout_margin="10dp"
+            android:layout_alignParentTop="true"/>
+
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_below="@id/no_answer_searchView"
             android:layout_above="@id/no_answer_spin"
             android:id="@+id/no_answer_recylerview"/>
 

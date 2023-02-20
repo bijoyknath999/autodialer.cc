@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +25,7 @@ import com.autodialer.autodialer.cc.adapters.ScheduleAdapters;
 import com.autodialer.autodialer.cc.api.ApiInterface;
 import com.autodialer.autodialer.cc.api.Constants;
 import com.autodialer.autodialer.cc.models.Datum2;
+import com.autodialer.autodialer.cc.models.Recording;
 import com.autodialer.autodialer.cc.models.Schedule;
 import com.github.ybq.android.spinkit.SpinKitView;
 
@@ -32,6 +34,7 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 
 public class NoAnswerFragment extends Fragment {
 
@@ -47,6 +50,7 @@ public class NoAnswerFragment extends Fragment {
     public static NoAnswerAdapters noAnswerAdapters;
     private Context context;
     public static TextView noAnswerError;
+    private SearchView searchView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -57,6 +61,7 @@ public class NoAnswerFragment extends Fragment {
         swipeRefreshLayout = view.findViewById(R.id.no_answer_swipe);
         spinKitView = view.findViewById(R.id.no_answer_spin);
         noAnswerError = view.findViewById(R.id.no_answer_error);
+        searchView = view.findViewById(R.id.no_answer_searchView);
 
         datum2List = new ArrayList<>();
 
@@ -105,6 +110,66 @@ public class NoAnswerFragment extends Fragment {
             public void onRefresh() {
                 progress.show();
                 LoadDataAfterDelete(context);
+            }
+        });
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                if (progress!=null)
+                    progress.show();
+
+                SharedPreferences pref = context.getApplicationContext().getSharedPreferences("AutoDialer", Activity.MODE_PRIVATE);
+                String userId = pref.getString("id","");
+                String admin_id = pref.getString("admin_id","");
+                ApiInterface.getApiRequestInterface().searchnoanser(userId,admin_id,query)
+                        .enqueue(new Callback<List<Datum2>>() {
+                            @Override
+                            public void onResponse(Call<List<Datum2>> call, Response<List<Datum2>> response) {
+                                if (response.isSuccessful())
+                                {
+                                    if (progress!=null)
+                                        progress.dismiss();
+
+                                    if (datum2List.size()>0)
+                                        datum2List.clear();
+
+                                    spinKitView.setVisibility(View.GONE);
+                                    swipeRefreshLayout.setRefreshing(false);
+                                    loading = true;
+
+                                    datum2List.addAll(response.body());
+
+                                    if (datum2List.size()>0) {
+                                        noAnswerError.setVisibility(View.GONE);
+                                        recyclerView.setVisibility(View.VISIBLE);
+                                    }
+                                    else {
+                                        noAnswerError.setVisibility(View.VISIBLE);
+                                        recyclerView.setVisibility(View.GONE);
+                                    }
+
+                                    noAnswerAdapters.notifyDataSetChanged();
+                                }
+                                if (progress!=null)
+                                    progress.dismiss();
+                            }
+
+                            @Override
+                            public void onFailure(Call<List<Datum2>> call, Throwable t) {
+                                noAnswerError.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                                if (progress!=null)
+                                    progress.dismiss();
+                                Toast.makeText(context, "Error : "+t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();                            }
+                        });
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //    adapter.getFilter().filter(newText);
+                return false;
             }
         });
 
